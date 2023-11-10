@@ -1,69 +1,25 @@
-var express = require("express");
+var express = require('express');
 var router = express.Router();
 
-const {
-  validateSchema,
-  checkIdSchema,
-  checkUpdateSchema,
-} = require("../../utils/index");
+let { validateSchema, checkIdSchema } = require('../../utils');
+const { getAllCategory, getDetailCategory, createCategory, putCategory, patchCategory, deleteCategory } = require('./controller');
+const { checkCreateCategorySchema, checkPutCategorySchema, checkPatchCategorySchema } = require('./validation');
 
-const {
-  getAllCategory,
-  getDetailCategory,
-  createCategory,
-  putCategory,
-  patchCategory,
-  deleteCategory,
-} = require("./controller");
-const {
-  checkCreatCategory,
-  checkPutCategory,
-  checkPatchCategory,
-} = require("./validation");
+// router.get('/', getAllCategory);
+// router.post('/', validateSchema(checkCreateSchema), createCategory);
+// router.get('/:id', validateSchema(checkIdSchema), getDetailCategory);
+// router.put('/:id', putCategory);
+// router.patch('/:id', patchCategory)
+// router.delete('/:id', deleteCategory);
 
-/* GET all user. */
-
-router
-  .route("/")
+router.route('/')
   .get(getAllCategory)
-  .post(validateSchema(checkCreatCategory), createCategory);
+  .post(validateSchema(checkCreateCategorySchema), createCategory)
 
-// router.get("/", getAllCategory);
-// router.post("/", validateSchema(checkCreatSchema), createCategory);
-router
-  .route("/:id")
+router.route("/:id")
   .get(validateSchema(checkIdSchema), getDetailCategory)
-  .put(
-    validateSchema(checkIdSchema),
-    validateSchema(checkPutCategory),
-    putCategory
-  )
-  .patch(
-    validateSchema(checkIdSchema),
-    validateSchema(checkPatchCategory),
-    patchCategory
-  )
-  .delete(validateSchema(checkIdSchema), deleteCategory);
-
-// router.get(
-//   "/:id",
-//   validateSchema(checkIdSchema),
-//   validateSchema(checkPriceSchema),
-//   getDetailCategory(validateSchema(checkCreatSchema), createCategory)
-// );
-
-// router.put(
-//   "/:id",
-//   validateSchema(checkIdSchema),
-//   validateSchema(checkUpdateSchema),
-//   putCategory
-// );
-// router.patch(
-//   "/:id",
-//   validateSchema(checkIdSchema),
-//   validateSchema(checkUpdateSchema),
-//   patchCategory
-// );
-// router.delete("/:id", validateSchema(checkIdSchema), deleteCategory);
+  .put(validateSchema(checkIdSchema), validateSchema(checkPutCategorySchema), putCategory)
+  .patch(validateSchema(checkIdSchema), validateSchema(checkPatchCategorySchema), patchCategory)
+  .delete(validateSchema(checkIdSchema), deleteCategory)
 
 module.exports = router;

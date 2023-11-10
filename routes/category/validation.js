@@ -1,26 +1,24 @@
-const yup = require("yup");
+const yup = require('yup');
 
 module.exports = {
-  checkCreatCategory: yup.object({
+  checkCreateCategorySchema: yup.object({
     body: yup.object({
-      name: yup.string().max(50).required(),
-      isDelete: yup.boolean(),
+      name: yup.string().required(),
       description: yup.string().max(500),
     }),
   }),
 
-  checkPutCategory: yup.object({
+  checkPutCategorySchema: yup.object({
     body: yup.object({
       name: yup.string().max(50).required(),
-      isDelete: yup.boolean(),
       description: yup.string().max(500),
     }),
   }),
 
-  checkPatchCategory: yup.object({
+  checkPatchCategorySchema: yup.object({
     body: yup.object({
       name: yup.string().max(50),
-      isDelete: yup.boolean(),
+      isDeleted: yup.boolean(),
       description: yup.string().max(500),
     }),
   }),

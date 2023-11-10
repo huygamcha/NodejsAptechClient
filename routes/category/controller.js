@@ -1,7 +1,4 @@
-let data = require("../../data/categories.json");
-const { hasError, writeFileSync } = require("../../utils/index");
-// const Category = require("../../models/category");
-
+const { sendErr, generationID, writeFileSync } = require("../../utils");
 const { Category } = require("../../models");
 
 module.exports = {
@@ -10,7 +7,7 @@ module.exports = {
       const result = await Category.find({ isDeleted: false });
 
       return res.send(200, {
-        message: "Lấy thành công",
+        message: "Lấy thông tin thành công",
         payload: result,
       });
     } catch (error) {
@@ -22,8 +19,12 @@ module.exports = {
   getDetailCategory: async (req, res, next) => {
     try {
       const { id } = req.params;
-      // const detail = data.find((item) => item.id.toString() === id);
+
       const result = await Category.findById(id);
+      // const result = await Category.findOne({
+      //   _id : id,
+      //   isDeleted: false,
+      // });
 
       if (!result) {
         return res.send(404, {
@@ -31,34 +32,26 @@ module.exports = {
         });
       }
 
-      if (!result.isDelete) {
-        return res.send(202, {
-          message: "Lấy thành công",
-          payload: result,
-        });
-      } else {
-        return res.send(202, {
-          message: "Không tồn tại",
+      if (result.isDeleted) {
+        return res.send(400, {
+          message: "Danh mục đã bị xóa",
         });
       }
+
+      return res.send(202, {
+        message: "Lấy thông tin thành công",
+        payload: result,
+      });
     } catch (error) {
       console.log("««««« error »»»»»", error);
-      return res.send(400, { message: "Không thành công" });
+      return sendErr(res);
     }
   },
 
   createCategory: async (req, res, next) => {
     try {
-      // const { name, description, isDelete = false } = req.body;
-      // const newP = {
-      //   id: generationID(),
-      //   name: name,
-      //   description: description,
-      //   isDelete: isDelete,
-      // };
-      // data = [...data, newP];
-      // writeFileSync("data/categories.json", data);
       const { name, description } = req.body;
+
       const newCategory = new Category({
         name,
         description,
@@ -66,13 +59,12 @@ module.exports = {
 
       const result = await newCategory.save();
 
-      res.send(200, {
-        message: "tạo mới thành công",
+      return res.send(202, {
+        message: "Tạo sản phẩm thành công",
         payload: result,
       });
     } catch (error) {
-      console.log("««««« error »»»»»");
-      hasError(error);
+      sendErr(res, error.errors);
     }
   },
 
@@ -81,122 +73,118 @@ module.exports = {
       const { id } = req.params;
       const { name, description } = req.body;
 
-      // const dataUpdate = {
-      //   id: +id,
-      //   name,
-      //   description,
-      //   isDelete,
-      // };
-      // data = data.map((item) => {
-      //   if (item.id === +id) {
-      //     hasId = true;
-      //     return dataUpdate;
-      //   }
-      //   return item;
-      // });
-      // writeFileSync("data/categories.json", data);
-      const resultId = await Category.findById(id);
+      // const result = await Category.findByIdAndUpdate(id, {name, description}, { new: true })
+      // const result = await Category.findOneAndUpdate(
+      //   {
+      //     // _id : mongoose.Types.ObjectId(id)
+      //     _id : id,
+      //     isDeleted: false,
+      //   },
+      //   {name, description},
+      //   { new: true },
+      // );
+      const result1 = await Category.findById(id);
 
-      if (!resultId) {
+      if (!result1) {
         return res.send(404, {
           message: "Không tìm thấy",
         });
       }
-      if (resultId.isDeleted) {
+
+      if (result1.isDeleted) {
         return res.send(404, {
-          message: "Đã bị xoá",
+          message: "Đã bị xóa",
         });
       }
 
-      const resultUpdate = await Category.findByIdAndUpdate(
+      const result2 = await Category.findByIdAndUpdate(
         id,
         { name, description },
         { new: true }
       );
-      if (resultUpdate) {
-        return res.send(404, {
-          message: "Cập nhật thành công",
-          payload: resultUpdate,
-        });
-      }
-    } catch (err) {
-      console.log("««««« errror »»»»»", err);
-      return hasError(res);
+
+      return res.send(202, {
+        message: "Cập nhật danh mục thành công",
+        payload: result2,
+      });
+    } catch (error) {
+      console.log("««««« error »»»»»", error);
+      return sendErr(res);
     }
   },
 
-  putCategory: (req, res, next) => {
+  putCategory: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { name, description, isDelete } = req.body;
-      let hasId = false;
+      const { name, description } = req.body;
 
-      let dataUpdate = {};
+      // const result = await Category.findByIdAndUpdate(id, {name, description}, { new: true })
+      // const result = await Category.findOneAndUpdate(
+      //   {
+      //     // _id : mongoose.Types.ObjectId(id)
+      //     _id : id,
+      //     isDeleted: false,
+      //   },
+      //   {name, description},
+      //   { new: true },
+      // );
+      const result1 = await Category.findById(id);
 
-      data = data.map((item) => {
-        if (item.id === +id) {
-          hasId = true;
-          dataUpdate = {
-            ...item,
-            name: name || item.name,
-            description: description || item.description,
-            isDelete: isDelete || item.isDelete,
-          };
-          return dataUpdate;
-        }
-        return item;
-      });
-
-      writeFileSync("data/categories.json", data);
-
-      if (hasId) {
-        return res.send(200, {
-          message: "cập nhật thành công",
-          payload: dataUpdate,
-        });
-      } else {
+      if (!result1) {
         return res.send(404, {
-          message: "Không tìm thấy ID nào",
+          message: "Không tìm thấy",
         });
       }
-    } catch (err) {
-      console.log("««««« error »»»»»", err);
-      return hasError(res);
+
+      if (result1.isDeleted) {
+        return res.send(404, {
+          message: "Đã bị xóa",
+        });
+      }
+
+      // const result2 = await Category.findByIdAndUpdate(id, { name, description: undefined }, { new: true })
+      const result2 = await Category.findByIdAndUpdate(
+        id,
+        { $set: { name, description: null } },
+        { new: true }
+      );
+
+      return res.send(202, {
+        message: "Cập nhật danh mục thành công",
+        payload: result2,
+      });
+    } catch (error) {
+      console.log("««««« error »»»»»", error);
+      return sendErr(res);
     }
   },
 
   deleteCategory: async (req, res, next) => {
     try {
       const { id } = req.params;
-      // data = data.filter((item) => item.id !== +id);
 
-      // writeFileSync("data/categories.json", data);
+      const result1 = await Category.findById(id);
 
-      const resultCheck = await Category.findById(id);
-
-      if (!resultCheck) {
+      if (!result1) {
         return res.send(404, {
-          message: "Không tìm thấy sản phẩm",
-        });
-      }
-      if (resultCheck.isDeleted) {
-        return res.send(404, {
-          message: "Sản phẩm đã bị xoá trước đây",
+          message: "Không tìm thấy",
         });
       }
 
-      const resultDelete = await Category.findByIdAndUpdate(id, {
-        isDeleted: true,
+      if (result1.isDeleted) {
+        return res.send(404, {
+          message: "Danh mục đã bị xóa từ trước",
+        });
+      }
+
+      await Category.updateOne({ _id: id }, { isDeleted: true });
+
+      return res.send(202, {
+        message: "Xóa sản phẩm thành công",
       });
-
-      if (resultDelete) {
-        return res.send(200, {
-          message: "Xoá thành công",
-        });
-      }
-    } catch (err) {
-      console.log("««««« err »»»»»", err);
-      return hasError(res);
+    } catch (error) {
+      console.log("««««« error »»»»»", error);
+      return sendErr(res);
     }
   },
 };
