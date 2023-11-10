@@ -1,4 +1,3 @@
-let data = require("../../data/Suppliers.json");
 const { hasError, writeFileSync, generationID } = require("../../utils/index");
 // const Supplier = require("../../models/supplier");
 const { Supplier } = require("../../models");
