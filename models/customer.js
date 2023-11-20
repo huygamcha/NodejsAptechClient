@@ -70,7 +70,7 @@ const customerSchema = new Schema(
 customerSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
-// pass 5353
+
 customerSchema.pre("save", async function (next) {
   try {
     // generate salt key
@@ -86,6 +86,7 @@ customerSchema.pre("save", async function (next) {
   }
 });
 
+// isValidPass => custom
 customerSchema.methods.isValidPass = async function (password) {
   try {
     return await bcrypt.compare(password, this.password);
